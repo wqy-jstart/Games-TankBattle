@@ -11,6 +11,7 @@ public class PlayerOne extends Tank {
     private boolean right = false;
     private boolean down = false;
 
+
     /**
      * 玩家一的构造方法
      *
@@ -23,7 +24,7 @@ public class PlayerOne extends Tank {
      * @param rightImage
      * @param gamePanel
      */
-    public PlayerOne(String img, int x, int y, String upImage, String downImage, String leftImage, String rightImage, GamePanel gamePanel) {
+    public PlayerOne(Image img, int x, int y, Image upImage, Image downImage, Image leftImage, Image rightImage, GamePanel gamePanel) {
         super(img, x, y, upImage, downImage, leftImage, rightImage, gamePanel);
     }
 
@@ -46,10 +47,10 @@ public class PlayerOne extends Tank {
             case KeyEvent.VK_W:
                 up = false;
                 break;
-            case KeyEvent.VK_SPACE://按下空格调用射击方法
-                attack();
             default:
                 break;
+
+
         }
     }
 
@@ -72,8 +73,12 @@ public class PlayerOne extends Tank {
             case KeyEvent.VK_W:
                 up = true;
                 break;
+            case KeyEvent.VK_SPACE:
+                attack();
             default:
                 break;
+
+
         }
     }
     public void move(){ // 根据状态前进/停止
@@ -90,13 +95,14 @@ public class PlayerOne extends Tank {
         }
     }
 
+
     /**
      * 重写超类的方法
      *
      * @param g 画笔
      */
     public void painSelf(Graphics g) {
-        g.drawImage(getImg(), getX(), getY(), null);
+        g.drawImage(img, x, y, null);
         move();
     }
 
@@ -106,6 +112,6 @@ public class PlayerOne extends Tank {
      * @return 返回游戏的矩形
      */
     public Rectangle getRec() {
-        return new Rectangle(getX(), getY(), width, height);
+        return new Rectangle(x, y, getWidth(), getWidth());
     }
 }

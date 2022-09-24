@@ -3,18 +3,58 @@ package tank;
 import java.awt.*;
 import java.util.Random;
 
-//随机出现
+//随机出现敌方坦克
 public class Bot extends Tank {
-    int moveTime = 0;
-    //添加构造器
-    public Bot(String img, int x, int y, String upImage, String downImage, String leftImage, String rightImage, GamePanel gamePanel) {
+    //移动的时间
+    private int moveTime = 0;
+    /**
+     * 敌方坦克的构造方法
+     * @param img
+     * @param x
+     * @param y
+     * @param upImage
+     * @param downImage
+     * @param leftImage
+     * @param rightImage
+     * @param gamePanel
+     */
+    public Bot(Image img, int x, int y, Image upImage, Image downImage, Image leftImage, Image rightImage, GamePanel gamePanel) {
         super(img, x, y, upImage, downImage, leftImage, rightImage, gamePanel);
     }
+    //敌方坦克移动
+    public void go(){
+        attack();
+        if(moveTime>=20) {
+            //当大于等于20时坦克按照随机数random移动
+            direction = getRandomDirection();
+            moveTime=0;
+        }else {
+            moveTime+=1;
+        }
+        switch (direction) {
+            case UP :
+                upward();
+                break;
+            case DOWN :
+                downward();
+                break;
+            case RIGHT :
+                rightward();
+                break;
+            case LEFT :
+                leftward();
+                break;
+        }
+    }
 
-    public Direction getRandDirection(){
-        Random random = new Random();//创建一个随机数来随机决定敌方坦克的方向
-        int run = random.nextInt(4);
-        switch (run){ //--------利用枚举类型中switch经典调用常量
+    /**
+     * 随机生成敌方坦克移动的方向
+     * @return 获取敌方坦克的方向
+     */
+    public Direction getRandomDirection(){
+        Random random = new Random();
+        int rnum = random.nextInt(4);
+        switch (rnum){
             case 0:
                 return Direction.LEFT;
             case 1:
@@ -28,47 +68,33 @@ public class Bot extends Tank {
         }
     }
 
-    public void go(){
-        attack();
-        if (moveTime>20){
-            direction = getRandDirection();
-            moveTime=0;
-        }else {
-            moveTime++;
-        }
-        switch (direction){
-            case LEFT:
-                leftward();
-                break;
-            case RIGHT:
-               rightward();
-                break;
-            case UP:
-                upward();
-                break;
-            case DOWN:
-                downward();
-                break;
-        }
-    }
-    //该方法处理敌方坦克射击功能
+    /**
+     * 敌方坦克发射子弹
+     */
     public void attack(){
         Point p = getHeadPoint();
         Random random = new Random();
-        int run = random.nextInt(400);//随机执行射击功能
-        if (run<10){
-            this.getGamePanel().bullets.add(new EnemyBullet("images/bullet/bulletYellow.gif",p.x,p.y,this.getGamePanel(),this.direction));
+        int rnum = random.nextInt(200);
+        if (rnum<4){
+            //获取默认的敌方子弹图片路径
+            EnemyBullet enemyBullet = new EnemyBullet(Toolkit.getDefaultToolkit().getImage("images/bullet/bulletYellow.gif"),p.x,p.y, gamePanel, direction);
+            this.gamePanel.bulletList.add(enemyBullet);
         }
     }
 
-    @Override
+
+
+    /**
+     * 重写超类的方法
+     *
+     * @param g 画笔
+     */
     public void painSelf(Graphics g) {
-        g.drawImage(getImg(),getX(),getY(),null);
-        go();
+        g.drawImage(img,x,y,null);
+        this.go();
     }
 
-    @Override
     public Rectangle getRec() {
-        return new Rectangle(getX(),getY(),width,height);
+        return new Rectangle(x, y, width, height);
     }
 }

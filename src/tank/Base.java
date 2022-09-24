@@ -2,24 +2,38 @@ package tank;
 
 import java.awt.*;
 
-//添加基地
+//基地
 public class Base extends GameObject {
-    //定义基地大小
-    int length = 50;
-    int height = 50;
+    //尺寸
+    public int width = 60;
+    public int height = 60;
 
-
-    public Base(String img, int x, int y, GamePanel gamePanel) {
+    /**
+     * 游戏的基地构造方法
+     *
+     * @param img
+     * @param x
+     * @param y
+     * @param gamePanel
+     */
+    public Base(Image img, int x, int y, GamePanel gamePanel) {
         super(img, x, y, gamePanel);
     }
 
-    @Override
-    public void painSelf(Graphics g) {
-        g.drawImage(getImg(),getX(),getY(),null);
-    }
 
-    @Override
+    /**
+     * 重写超类的方法
+     *
+     * @param g 画笔
+     */
+    public void painSelf(Graphics g) {
+        g.drawImage(img,x,y,null);
+    }
+    /**
+     * 获取当前游戏元素的矩形,是为碰撞检测而写（位置）
+     * @return
+     */
     public Rectangle getRec() {
-        return new Rectangle(getX(),getY(),length,height);
+        return new Rectangle(x, y, width, height);
     }
 }

@@ -2,115 +2,150 @@ package tank;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.List;
 
-//子弹------实现我方子弹射击功能
+//子弹
 public class Bullet extends GameObject {
-    //大小
-    int width = 10;
-    int height = 10;
+    //尺寸
+    protected int width = 10;
+    protected int height = 10;
+    //速度
+    private int speed = 7;
     //方向
     Direction direction;
-    //速度
-    int speed = 15;
-    //构造器
-    public Bullet(String img, int x, int y, GamePanel gamePanel, Direction direction) {
+
+    /**
+     * 子弹的构造方法
+     *
+     * @param img
+     * @param x
+     * @param y
+     * @param gamePanel
+     * @param direction
+     */
+    public Bullet(Image img, int x, int y, GamePanel gamePanel, Direction direction) {
         super(img, x, y, gamePanel);
         this.direction = direction;
     }
 
-    //四个方向移动无返回值
-    public void leftMove(){
-        setX(getX()-this.speed);
-    }
-    public void rightMove(){
-        setX(getX()+this.speed);
-    }
-    public void upMove(){
-        setY(getY()-this.speed);
-    }
-    public void downMove(){
-        setY(getY()+this.speed);
-    }
-
     /**
-     * 创建go方法使子弹移动
-     * 该方法利用枚举类常用的switch分支方式,来根据坦克所对的方向来决定子弹移动的方向
+     * 判断移动方向
      */
     public void go(){
-        switch (direction){
-            case LEFT:
-                leftMove();
+        /*判断移动方向*/
+        switch (direction) {
+            case UP :
+                upward();
                 break;
-            case RIGHT:
-                rightMove();
+            case LEFT :
+                leftward();
                 break;
-            case UP:
-                upMove();
+            case DOWN :
+                downward();
                 break;
-            case DOWN:
-                downMove();
+            case RIGHT :
+                rightward();
                 break;
         }
         this.hitWall();
-        this.MoveBorder();
+        this.moveToBorder();
         this.hitBase();
     }
-    //子弹与敌方坦克检测碰撞碰撞
+
+    // 子弹移动+边界判断
+    public void leftward() {
+        x -= speed;
+
+    }
+
+    public void rightward() {
+        x += speed;
+
+    }
+
+    public void upward() {
+        y -= speed;
+
+    }
+
+    public void downward() {
+        y += speed;
+
+    }
+
+    /*子弹与坦克碰撞检测*/
     public void hitBot(){
-        ArrayList<Bot> bot = this.getGamePanel().bots;
-        for(Bot b : bot){
-            if (this.getRec().intersects(b.getRec())){
-                this.getGamePanel().bots.remove(b);
-                this.getGamePanel().removeList.add(this);
+        List<Bot> bots = this.gamePanel.botList;
+
+        //子弹和bot
+        for(Bot bot: bots){
+            //我方子弹与敌方坦克碰撞检测
+            if (this.getRec().intersects(bot.getRec())){
+                this.gamePanel.blastList.add(new BlastObj(bot.x-34, bot.y-14));
+                this.gamePanel.botList.remove(bot);
+                this.gamePanel.removeList.add(this);
+                GamePanel.enemyCount--;
                 break;
             }
+
         }
     }
 
-    //子弹与围墙碰撞检测
+    /**
+     * 子弹与墙碰撞检测
+     */
     public void hitWall(){
-        ArrayList<Wall> walls = this.getGamePanel().wallsList;
-        for (Wall wall : walls){
-            if (this.getRec().intersects(wall.getRec())){
-                this.getGamePanel().wallsList.remove(wall);
-                this.getGamePanel().removeList.add(this);
+        List<Wall> walls = this.gamePanel.wallList;
+        for(Wall w: walls) {
+            //我方子弹与墙碰撞检测
+            if (this.getRec().intersects(w.getRec())) {
+                this.gamePanel.wallList.remove(w);
+                this.gamePanel.removeList.add(this);
                 break;
             }
         }
     }
-
-    //子弹与基地碰撞检测
+    // 出界回收
+    public void moveToBorder(){
+        if (x < 0||x +width> this.gamePanel.getWidth()) {
+            this.gamePanel.removeList.add(this);
+        }
+        if(y < 0||y+height > this.gamePanel.getHeight()) {
+            this.gamePanel.removeList.add(this);
+        }
+    }
+    //子弹与基地碰撞
     public void hitBase(){
-        ArrayList<Base> bases = this.getGamePanel().baseList;
-        for(Base base : bases){
+        List<Base> bases = this.gamePanel.baseList;
+        for (Base base : bases){
             if (this.getRec().intersects(base.getRec())){
-                this.getGamePanel().baseList.remove(base);
-                this.getGamePanel().removeList.add(this);
+                this.gamePanel.baseList.remove(base);
+                this.gamePanel.removeList.add(this);
                 break;
+
             }
         }
-    }
-
-
-    public void MoveBorder(){
-        if (this.getX()<0 || this.getX()+this.width > this.getGamePanel().getWidth()){
-            this.getGamePanel().removeList.add(this);
         }
-        if (this.getY()<0 || this.getY()+this.height > this.getGamePanel().getHeight()){
-            this.getGamePanel().removeList.add(this);
-        }
-    }
 
-    //重写超类两个抽象方法
-    //画笔方法,传入坐标和图片
-    @Override
+
+    /**
+     * 重写超类的方法
+     *
+     * @param g 画笔
+     */
     public void painSelf(Graphics g) {
-        g.drawImage(getImg(),getX(),getY(),null);
-        this.go();//调用go方法来移动子弹
-        this.hitBot();
+        g.drawImage(img, x, y, null);
+        go();
+        hitBot();
+        hitWall();
+
+
     }
-    //返回矩形方法,传入坐标和大小
-    public Rectangle getRec(){
-        return new Rectangle(getX(),getY(),width,height);
+    /**
+     * 获取当前游戏元素的矩形,是为碰撞检测而写（位置）
+     * @return
+     */
+    public Rectangle getRec() {
+        return new Rectangle(x, y, width, height);
     }
 }
